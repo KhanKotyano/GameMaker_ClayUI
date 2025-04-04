@@ -75,7 +75,7 @@ static Clay_Dimensions GmlMeasureText(Clay_StringSlice text, Clay_TextElementCon
     Vector2 v =  MeasureTextEx_ext(fontToUse, text.chars, config->fontSize, config->letterSpacing, text.length);
     textSize.width = v.x ;
     textSize.height = v.y;
-    MemoryArenaClear(&internal_arena);
+    //MemoryArenaClear(&internal_arena);
     return textSize;
   }
   
@@ -105,7 +105,7 @@ DLLEXPORT double gml_clay_debug_mode(double flag) {
   return 1;
 }
 DLLEXPORT double gml_clay_init(double screen_width, double screen_height) {
-    internal_arena = MemoryArenaInit((size_t)(5529600 * 2));
+    //internal_arena = MemoryArenaInit((size_t)(5529600 * 2));
     clay_data.memory_size = Clay_MinMemorySize();
     clay_data.memory.capacity = clay_data.memory_size;
     clay_data.memory.memory = (char*)calloc(clay_data.memory_size,sizeof(char)) ;
