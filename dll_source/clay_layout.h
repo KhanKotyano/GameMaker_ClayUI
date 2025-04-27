@@ -111,7 +111,11 @@ DLLEXPORT double gml_clay_element_config(){
     Clay__ConfigureOpenElementDynamic(current_elemet);
     return 1;
 }
-
+DLLEXPORT double gml_clay_ui_set_scrolling(double horizontal, double vertical){
+    current_elemet.scroll.horizontal = (bool)horizontal;
+    current_elemet.scroll.vertical= (bool)vertical;
+    return 1;
+  }
 DLLEXPORT double gml_clay_ui_element_set_border( double border_w){
     current_elemet.border.width.bottom = border_w;
     current_elemet.border.width.right = border_w;

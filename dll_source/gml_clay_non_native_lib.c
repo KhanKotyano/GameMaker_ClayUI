@@ -66,7 +66,9 @@ typedef struct {
 }StringSliceUTF32;
  
 static Clay_Dimensions GmlMeasureText(Clay_StringSlice text, Clay_TextElementConfig *config, void *userData) {
-    Clay_Dimensions textSize = { 0 };
+  //double idk = 110000102541E74; 
+  
+  Clay_Dimensions textSize = { 0 };
     Font fontToUse = clay_data.fonts[config->fontId];
     if (!fontToUse.glyphs) {
         printf("[ClayUI]: Font fail to be recognized\n");
@@ -89,23 +91,47 @@ DLLEXPORT double gml_clay_update(double width, double height) {
     clay_data.screen_size.height = height;
     clay_data.screen_size.width = width;
 
-    clay_data.delta_time = GetFrameTime();
+    ///clay_data.delta_time = GetFrameTime();
     Vector2 scrollDelta = GetMouseWheelMoveV();
     Clay_SetLayoutDimensions((Clay_Dimensions){.height = height, .width = width});
     Clay_SetPointerState(clay_data.mouse_pos, clay_data.is_accept_pressed);
     Clay_UpdateScrollContainers(true, (Clay_Vector2) { scrollDelta.x, scrollDelta.y }, clay_data.delta_time);
     Clay_SetMeasureTextFunction(GmlMeasureText, clay_data.fonts);
     clay_data.render_commands = ClayGetRenderCommands();
-    //if(m_requests.request_completed)MemoryArenaClear(&internal_arena);
+    //MemoryArenaClear(&internal_arena);
     //m_requests.request_completed = 0;  
     return (double)clay_data.render_commands.length;
+}
+DLLEXPORT double gml_clay_clear_arena(){
+  MemoryArenaClear(&internal_arena);
+  return 1;
+}
+DLLEXPORT double gml_clay_update_logic(double width, double height) {
+  #if !(NATIVE_RENDER)
+  if(width !=  clay_data.screen_size.width && height!=clay_data.screen_size.height){
+    SetWindowSize(width, height);
+  }
+  #endif
+  clay_data.screen_size.height = height;
+  clay_data.screen_size.width = width;
+
+  //clay_data.delta_time = GetFrameTime();
+  // IsKeyPressed
+  Clay_SetLayoutDimensions((Clay_Dimensions){.height = height, .width = width});
+  Clay_SetPointerState(clay_data.mouse_pos,  clay_data.is_accept_pressed);
+  Clay_UpdateScrollContainers(true, clay_data.mouse_wheel_pos, clay_data.delta_time);
+  Clay_SetMeasureTextFunction(GmlMeasureText, clay_data.fonts);
+ // clay_data.render_commands = ClayGetRenderCommands();
+  //MemoryArenaClear(&internal_arena);
+  //m_requests.request_completed = 0;  
+  return 1;
 }
 DLLEXPORT double gml_clay_debug_mode(double flag) {
   Clay_SetDebugModeEnabled((bool)flag);
   return 1;
 }
 DLLEXPORT double gml_clay_init(double screen_width, double screen_height) {
-    //internal_arena = MemoryArenaInit((size_t)(5529600 * 2));
+    internal_arena = MemoryArenaInit((size_t)(5529600 * 2));
     clay_data.memory_size = Clay_MinMemorySize();
     clay_data.memory.capacity = clay_data.memory_size;
     clay_data.memory.memory = (char*)calloc(clay_data.memory_size,sizeof(char)) ;
@@ -125,7 +151,6 @@ DLLEXPORT double gml_clay_init(double screen_width, double screen_height) {
     return 1;
 }
 DLLEXPORT double gml_clay_add_font(char *name){
-  
     if(clay_data.fonts_number < 100){
       //clay_data.fonts[clay_data.fonts_number] = LoadFontFromMemory(".ttf", );
       clay_data.fonts[clay_data.fonts_number] = LoadFontEx(TextFormat("fonts/%s", name), 32, 0, 400);

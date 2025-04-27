@@ -1,4 +1,7 @@
 
+
+
+
 DLLEXPORT char *gml_clay_get_next_text_signal(double id){
   return m_requests.text[(int)id];
 }
@@ -33,6 +36,10 @@ DLLEXPORT double gml_clay_set_is_assept_down(double assept_state){
   clay_data.is_accept_pressed = assept_state;
   return 1;
 }
+DLLEXPORT double gml_clay_set_delta_time(double delta_time){
+  clay_data.delta_time = delta_time;
+  return 1;
+}
 
 DLLEXPORT double gml_clay_set_render_flag(double flag, double value){
   u32 _lflag = (u32)flag;
@@ -51,7 +58,12 @@ DLLEXPORT double gml_clay_get_render_flag(double flag){
   return -1;
 }
 
+DLLEXPORT double gml_clay_set_mousewheel_vector(double x, double y) {
+  clay_data.mouse_wheel_pos.x =  (float)x;
+  clay_data.mouse_wheel_pos.y = (float)y;
 
+  return 1;
+}
 DLLEXPORT double gml_clay_get_command_buffer_length(){
     return (double)clay_data.render_commands.length;
 }
@@ -60,6 +72,8 @@ DLLEXPORT double gml_clay_get_command_buffer_size() {
 }
 
 #define local_cmd clay_data.render_commands.internalArray[clay_data.counter]
+
+
 
 DLLEXPORT double gml_clay_get_on_image_id(){
   return  (double)local_cmd.renderData.image.imageData;
@@ -108,14 +122,36 @@ DLLEXPORT double gml_clay_get_is_brect_full(){
 
 static char *cloned = NULL;
 DLLEXPORT char* gml_clay_get_string(){
-  cloned = (char *)malloc(local_cmd.renderData.text.stringContents.length + 1);
+  cloned = (char *)MemoryRequest(local_cmd.renderData.text.stringContents.length + 1, &internal_arena);
+  //(char *)malloc(local_cmd.renderData.text.stringContents.length + 1);
   memcpy(cloned, local_cmd.renderData.text.stringContents.chars, local_cmd.renderData.text.stringContents.length);
   cloned[local_cmd.renderData.text.stringContents.length] = '\0';
   return cloned;
 }
 DLLEXPORT double gml_clay_free_string(){
-  if (cloned != NULL) free(cloned);
-  return 1;
+  //if (cloned != NULL) free(cloned);
+  return internal_arena.size;
+}
+// s32 RemoveSpacesAtTheEnd(char *gml_string, s32 length){
+//   s32 count = 0;
+//   loopr(i,length-1){
+//     if(gml_string[i] == ' '){
+//       count++;
+//       gml_string[i] = 0;
+//     } else {
+//       break;
+//     }
+//   }
+//   return length-count;
+// }
+DLLEXPORT char *gml_clay_save_string(char *gml_string){
+  s32 length = strlen(gml_string);
+
+  cloned = (char *)MemoryRequest(length + 1, &internal_arena);
+  memcpy(cloned, gml_string, length);
+  //length = RemoveSpacesAtTheEnd(cloned, length);
+  //if (cloned != NULL) free(cloned);
+  return cloned;
 }
 DLLEXPORT double gml_clay_dispatch_command(){
   if(clay_data.counter+1 < clay_data.render_commands.length) {

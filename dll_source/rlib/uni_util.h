@@ -23,6 +23,7 @@ typedef uint_fast32_t fast_uint;
 typedef s8 bool_s8;
 
 #define loop(name, count) for(fast_int name = 0;name < count;name++)
+#define loopr(name, count) for(fast_int name = count;name >= count;name--)
 static fast_uint __REPEAT_COUNTER__ = 0;
 #define repeat(count) for(__REPEAT_COUNTER__ = 0; __REPEAT_COUNTER__< count;__REPEAT_COUNTER__++)
 
@@ -89,9 +90,11 @@ static InternalMemoryArena MemoryArenaInit(size_t allocated_size){
 static void* MemoryRequest(size_t byte_size, InternalMemoryArena *arena){
   char *_ret = (char *)(arena->buffer + arena->size);
   arena->size +=(size_t)(byte_size+(size_t)1);
+  arena->buffer[byte_size] = '\0';
   return (void*)_ret;
 }
 static void MemoryArenaClear(InternalMemoryArena *arena){
+  ZeroMemory_Util(arena->buffer, arena->size);
   arena->size = 0;
 }
 
