@@ -1,0 +1,7 @@
+# VS Code settings folder & workspace files
+.vscode/
+*.code-workspace
+
+# Dynamic libraries
+*.dll
+*.dylib
