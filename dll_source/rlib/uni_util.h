@@ -172,8 +172,8 @@ static inline float ClampF32(float Min, float Value, float Max) {
 static iV2 GetGridOnHover(float _mouse_world_pos_x, float _mouse_world_pos_y, unsigned int grid_width, unsigned int grid_height,
   float grid_world_offset_x, float grid_world_offset_y, int pixel_size) {
   iV2 on_hover_grid = {0};
-  on_hover_grid.x = (((unsigned int)_mouse_world_pos_x - grid_world_offset_x) / pixel_size) * (_mouse_world_pos_x >= 0);
-  on_hover_grid.y = (((unsigned int)_mouse_world_pos_y - grid_world_offset_y) / pixel_size) * (_mouse_world_pos_y >= 0);
+  on_hover_grid.x = (((unsigned int)_mouse_world_pos_x - (unsigned int)grid_world_offset_x) / pixel_size) * (_mouse_world_pos_x >= 0);
+  on_hover_grid.y = (((unsigned int)_mouse_world_pos_y -(unsigned int)grid_world_offset_y) / pixel_size) * (_mouse_world_pos_y >= 0);
   if (on_hover_grid.x >= grid_width) on_hover_grid.x = grid_width - 1;
   if (on_hover_grid.y >= grid_height) on_hover_grid.y = grid_height - 1;
   return on_hover_grid;

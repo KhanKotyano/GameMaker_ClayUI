@@ -2,24 +2,24 @@
 
 
 
-DLLEXPORT char *gml_clay_get_next_text_signal(double id){
-  return m_requests.text[(int)id];
-}
-DLLEXPORT double gml_clay_get_text_signal_left(){
-  m_requests.length--;
-  return (double)(m_requests.length);
-}
-DLLEXPORT double gml_clay_set_text_signal_dimentions(double width, double height){
-  m_requests.text_dim[m_requests.length].height = (float)height;
-  m_requests.text_dim[m_requests.length].width = (float)width;
-  return 1;
-}
-DLLEXPORT double gml_clay_end_text_signal_process(){
-  //m_requests.counter= 0;
-  m_requests.length = 0;
-  m_requests.request_completed = 1;
-  return 1;
-}
+// DLLEXPORT char *gml_clay_get_next_text_signal(double id){
+//   return m_requests.text[(int)id];
+// }
+// DLLEXPORT double gml_clay_get_text_signal_left(){
+//   m_requests.length--;
+//   return (double)(m_requests.length);
+// }
+// DLLEXPORT double gml_clay_set_text_signal_dimentions(double width, double height){
+//   m_requests.text_dim[m_requests.length].height = (float)height;
+//   m_requests.text_dim[m_requests.length].width = (float)width;
+//   return 1;
+// }
+// DLLEXPORT double gml_clay_end_text_signal_process(){
+//   //m_requests.counter= 0;
+//   m_requests.length = 0;
+//   m_requests.request_completed = 1;
+//   return 1;
+// }
 
 DLLEXPORT double gml_clay_get_on_hover(char *name){
   return (double)Clay_PointerOver(Clay_GetElementId((Clay_String){.chars = name, .length = strlen(name)}));

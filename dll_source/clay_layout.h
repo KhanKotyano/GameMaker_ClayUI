@@ -157,6 +157,13 @@ DLLEXPORT double gml_clay_ui_element_attach_to_point( double point_x, double poi
 //
 //text
 static Clay_TextElementConfig current_text_config = {0};
+// DLLEXPORT double gml_clay_set_text_wrapmode(double wrapmode){
+//     current_text_config.letterSpacing = (u16)f_space;
+//     current_text_config.lineHeight = (u16)f_line_h;
+//     current_text_config.wrapMode = (Clay_TextElementConfigWrapMode)f_wrapmode;
+//     return 1;
+// }
+
 DLLEXPORT double gml_clay_set_text_spacing(double f_space, double f_line_h,double f_wrapmode){
     current_text_config.letterSpacing = (u16)f_space;
     current_text_config.lineHeight = (u16)f_line_h;
@@ -223,7 +230,7 @@ static Clay_RenderCommandArray ClayGetRenderCommands(){
 }
 DLLEXPORT double gml_clay_begin_layout(){
     open_elements = 0;
-    m_requests.counter = 0;
+    //m_requests.counter = 0;
     ZeroMemory_Util(&current_elemet, sizeof(Clay_ElementDeclaration));
     Clay_BeginLayout();
     return 1;
@@ -326,78 +333,73 @@ DLLEXPORT double gml_clay_ui_element_layout_direction(double dir){
 //       }}){
 //         CLAY({.id = 0});
 //       };
-//     // }) {
-//     //   // Child elements go inside braces
-//     //   CLAY({ .id = CLAY_ID("HeaderBar"),
-//     //       .layout = {
-//     //           .sizing = {
-//     //               .height = CLAY_SIZING_FIXED(60),
-//     //               .width = CLAY_SIZING_GROW(0)
-//     //           },
-//     //           .padding = { 16, 16, 0, 0 },
-//     //           .childGap = 16,
-//     //           .childAlignment = {
-//     //               .y = CLAY_ALIGN_Y_CENTER
-//     //           }
-//     //       },
-//     //       .backgroundColor = GRAY_UNI(Clay_Color),
-//     //       .cornerRadius = CLAY_CORNER_RADIUS(8)
-//     //   }) {
-//     //       // Header buttons go here
-//     //       CLAY({ .id = CLAY_ID("FileButton"),
-//     //           .layout = { .padding = { 16, 16, 8, 8 }},
-//     //           .backgroundColor = {140, 140, 140, 255 },
-//     //           .cornerRadius = CLAY_CORNER_RADIUS(5)
-//     //       }) {
-//     //           CLAY_TEXT(CLAY_STRING("File"), CLAY_TEXT_CONFIG({
-//     //               .fontId = 0,
-//     //               .fontSize = 16,
-//     //               .textColor = { 255, 255, 255, 255 }
-//     //           }));
+//     }) {
+//       // Child elements go inside braces
+//       CLAY({ .id = CLAY_ID("HeaderBar"),
+//             .layout = {
+//                 .sizing = {.height = CLAY_SIZING_FIXED(60),.width = CLAY_SIZING_GROW(0)},
+//                 .padding = { 16, 16, 0, 0 },
+//                 .childGap = 16,
+//                 .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}
+//             },
+//           .backgroundColor = GRAY_UNI(Clay_Color),
+//           .cornerRadius = CLAY_CORNER_RADIUS(8)
+//       }) {
+//           // Header buttons go here
+//           CLAY({ .id = CLAY_ID("FileButton"),
+//               .layout = { .padding = { 16, 16, 8, 8 }},
+//               .backgroundColor = {140, 140, 140, 255 },
+//               .cornerRadius = CLAY_CORNER_RADIUS(5)
+//           }) {
+//               CLAY_TEXT(CLAY_STRING("File"), CLAY_TEXT_CONFIG({
+//                   .fontId = 0,
+//                   .fontSize = 16,
+//                   .textColor = { 255, 255, 255, 255 }
+//               }));
   
-//     //           bool fileMenuVisible =
-//     //               Clay_PointerOver(Clay_GetElementId(CLAY_STRING("FileButton")))
-//     //               ||
-//     //               Clay_PointerOver(Clay_GetElementId(CLAY_STRING("FileMenu")));
+//               bool fileMenuVisible =
+//                   Clay_PointerOver(Clay_GetElementId(CLAY_STRING("FileButton")))
+//                   ||
+//                   Clay_PointerOver(Clay_GetElementId(CLAY_STRING("FileMenu")));
   
-//     //           if (fileMenuVisible) { // Below has been changed slightly to fix the small bug where the menu would dismiss when mousing over the top gap
-//     //               CLAY({ .id = CLAY_ID("FileMenu"),
-//     //                   .floating = {
-//     //                       .attachTo = CLAY_ATTACH_TO_PARENT,
-//     //                       .attachPoints = {
-//     //                           .parent = CLAY_ATTACH_POINT_LEFT_BOTTOM
-//     //                       },
-//     //                   },
-//     //                   .layout = {
-//     //                       .padding = {0, 0, 8, 8 }
-//     //                   }
-//     //               }) {
-//     //                   CLAY({
-//     //                       .layout = {
-//     //                           .layoutDirection = CLAY_TOP_TO_BOTTOM,
-//     //                           .sizing = {
-//     //                                   .width = CLAY_SIZING_FIXED(200)
-//     //                           },
-//     //                       },
-//     //                       .backgroundColor = {40, 40, 40, 255 },
-//     //                       .cornerRadius = CLAY_CORNER_RADIUS(8)
-//     //                   }) {
-//     //                       // Render dropdown items here
-//     //                       RenderDropdownMenuItem(CLAY_STRING("New"));
-//     //                       RenderDropdownMenuItem(CLAY_STRING("Open"));
-//     //                       RenderDropdownMenuItem(CLAY_STRING("Close"));
-//     //                   }
-//     //               }
-//     //           }
-//     //       }
-//     //       RenderHeaderButton(CLAY_STRING("Edit"));
-//     //       CLAY({ .layout = { .sizing = { CLAY_SIZING_GROW(0) }}}) {}
-//     //       RenderHeaderButton(CLAY_STRING("Upload"));
-//     //       RenderHeaderButton(CLAY_STRING("Media"));
-//     //       RenderHeaderButton(CLAY_STRING("Support"));
-//     //   }
-//     // }
+//               if (fileMenuVisible) { // Below has been changed slightly to fix the small bug where the menu would dismiss when mousing over the top gap
+//                   CLAY({ .id = CLAY_ID("FileMenu"),
+//                       .floating = {
+//                           .attachTo = CLAY_ATTACH_TO_PARENT,
+//                           .attachPoints = {
+//                               .parent = CLAY_ATTACH_POINT_LEFT_BOTTOM
+//                           },
+//                       },
+//                       .layout = {
+//                           .padding = {0, 0, 8, 8 }
+//                       }
+//                   }) {
+//                       CLAY({
+//                           .layout = {
+//                               .layoutDirection = CLAY_TOP_TO_BOTTOM,
+//                               .sizing = {
+//                                       .width = CLAY_SIZING_FIXED(200)
+//                               },
+//                           },
+//                           .backgroundColor = {40, 40, 40, 255 },
+//                           .cornerRadius = CLAY_CORNER_RADIUS(8)
+//                       }) {
+//                           // Render dropdown items here
+//                           RenderDropdownMenuItem(CLAY_STRING("New"));
+//                           RenderDropdownMenuItem(CLAY_STRING("Open"));
+//                           RenderDropdownMenuItem(CLAY_STRING("Close"));
+//                       }
+//                   }
+//               }
+//           }
+//           RenderHeaderButton(CLAY_STRING("Edit"));
+//           CLAY({ .layout = { .sizing = { CLAY_SIZING_GROW(0) }}}) {}
+//           RenderHeaderButton(CLAY_STRING("Upload"));
+//           RenderHeaderButton(CLAY_STRING("Media"));
+//           RenderHeaderButton(CLAY_STRING("Support"));
+//       }
+//     }
   
 //     Clay_RenderCommandArray renderCommands = Clay_EndLayout();
 //     return renderCommands;
-//   }  
+//   }

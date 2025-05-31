@@ -17,7 +17,10 @@ static s32 render_flags[CLAY_RENDER_COMMAND_TYPE_CUSTOM+1]={1};
 #define DEBUG_RENDER 1
 #define NATIVE_RENDER 1
 
-
+DLLEXPORT double open_url_reliable(char *string){
+  OpenURL(string);
+  return 1;
+}
 
 void HandleClayErrors(Clay_ErrorData errorData) {
     // See the Clay_ErrorData struct for more information
@@ -44,14 +47,14 @@ typedef struct {
 }ClayInternalData;
 
 static ClayInternalData clay_data = {0};
-typedef struct {
-  char *text[1000];
-  s32 length;
-  s32 counter;
-  Clay_Dimensions text_dim[1000];
-  bool_s8 request_completed;
-} MeasureRequests;
-static MeasureRequests m_requests = {0};
+// typedef struct {
+//   char *text[1000];
+//   s32 length;
+//   s32 counter;
+//   Clay_Dimensions text_dim[1000];
+//   bool_s8 request_completed;
+// } MeasureRequests;
+// static MeasureRequests m_requests = {0};
 static InternalMemoryArena internal_arena = {0};
 #if !NATIVE_RENDER
 #include "surface_ext.c"
@@ -92,7 +95,7 @@ DLLEXPORT double gml_clay_update(double width, double height) {
     clay_data.screen_size.width = width;
 
     ///clay_data.delta_time = GetFrameTime();
-    Vector2 scrollDelta = GetMouseWheelMoveV();
+    Vector2 scrollDelta = {clay_data.mouse_wheel_pos.x,clay_data.mouse_wheel_pos.y};
     Clay_SetLayoutDimensions((Clay_Dimensions){.height = height, .width = width});
     Clay_SetPointerState(clay_data.mouse_pos, clay_data.is_accept_pressed);
     Clay_UpdateScrollContainers(true, (Clay_Vector2) { scrollDelta.x, scrollDelta.y }, clay_data.delta_time);

@@ -1163,7 +1163,7 @@ Clay__MeasureTextCacheItem *Clay__MeasureTextCached(Clay_String *text, Clay_Text
             return &Clay__MeasureTextCacheItem_DEFAULT;
         }
         char current = text->chars[end];
-        if (current == ' ' || current == '\n') {
+        if (current == ' ' || current == '\n' || (current == 92 && text->chars[end+1] == 'n')) {
             int32_t length = end - start;
             Clay_Dimensions dimensions = Clay__MeasureText(CLAY__INIT(Clay_StringSlice) { .length = length, .chars = &text->chars[start], .baseChars = text->chars }, config, context->measureTextUserData);
             measuredHeight = CLAY__MAX(measuredHeight, dimensions.height);
@@ -1172,7 +1172,7 @@ Clay__MeasureTextCacheItem *Clay__MeasureTextCached(Clay_String *text, Clay_Text
                 previousWord = Clay__AddMeasuredWord(CLAY__INIT(Clay__MeasuredWord) { .startOffset = start, .length = length + 1, .width = dimensions.width, .next = -1 }, previousWord);
                 lineWidth += dimensions.width;
             }
-            if (current == '\n') {
+            if (current == '\n' ) {
                 if (length > 0) {
                     previousWord = Clay__AddMeasuredWord(CLAY__INIT(Clay__MeasuredWord) { .startOffset = start, .length = length, .width = dimensions.width, .next = -1 }, previousWord);
                 }
@@ -1181,6 +1181,18 @@ Clay__MeasureTextCacheItem *Clay__MeasureTextCached(Clay_String *text, Clay_Text
                 measuredWidth = CLAY__MAX(lineWidth, measuredWidth);
                 measured->containsNewlines = true;
                 lineWidth = 0;
+            }
+            //KotyanChange
+            if (current == 92 && text->chars[end+1] == 'n'){
+                if (length > 0) {
+                    previousWord = Clay__AddMeasuredWord(CLAY__INIT(Clay__MeasuredWord) { .startOffset = start, .length = length, .width = dimensions.width, .next = -1 }, previousWord);
+                }
+                previousWord = Clay__AddMeasuredWord(CLAY__INIT(Clay__MeasuredWord) { .startOffset = end + 2, .length = 0, .width = 0, .next = -1 }, previousWord);
+                lineWidth += dimensions.width;
+                measuredWidth = CLAY__MAX(lineWidth, measuredWidth);
+                measured->containsNewlines = true;
+                lineWidth = 0;
+                end++;
             }
             start = end + 1;
         }
