@@ -48,7 +48,14 @@ function ClayInit(_width, height){
 		ret = gml_clay_init(_width, height);
 		ClayOnInit();
 		if(ret !=1){
-			show_debug_message("[ClayUI]:Clay was not able to init itself");	
+			show_error("[ClayUI]:Clay was not able to init itself", true);
+			/*
+				If an error message lead you here, this means clay.dll was not 
+				be able to load it self. Please check you settings of clay in the ClayUI pluggin
+				and set nlib.dll target to Windows, and export target to Windows.
+				If nothing helps, message to "Khan Kotyan (˶•̀⩊•́˶)" on discord,
+				or in developer chat to try to solve this issue
+			*/
 		} else {
 			show_debug_message("[ClayUI]:Init is done");	
 		}
@@ -188,6 +195,8 @@ function RenderClayCommandsOnPing(_surface_id, _ping){
 	if(!surface_exists(_surface)) _ping = true;
 	if(_ping){
 		_surface = RenderClayCommands(_surface);
+	} else {
+		ClayEmptyDispatch();	
 	}
 	gml_clay_clear_arena();
 	_surface = ResizeSurfToWin(_surface)
@@ -197,10 +206,10 @@ function RenderClayCommandsOnPing(_surface_id, _ping){
 
 
 function ResizeSurfToWin(_surface){
-	if(window_get_width() != WIN_WIDTH || window_get_height() != WIN_HEIGHT){
-		if((window_get_width() * window_get_height()) > 0){
-			WIN_WIDTH = window_get_width();
-			WIN_HEIGHT = window_get_height();
+	if(display_get_gui_width() != WIN_WIDTH || display_get_gui_height() != WIN_HEIGHT){
+		if((display_get_gui_width() * display_get_gui_height()) > 0){
+			WIN_WIDTH = display_get_gui_width();
+			WIN_HEIGHT = display_get_gui_height();
 			surface_resize(_surface, WIN_WIDTH, WIN_HEIGHT);
 		}
 	}
@@ -215,48 +224,6 @@ function RenderClayCommands(_surface){
 	
 	return _surface;
 }
-function GetCommandType(_buffer, _offset){
-	return buffer_peek(_buffer, _offset, buffer_u32);
-}
-function GetCommandID(_buffer, _offset){
-	return buffer_peek(_buffer, _offset+4, buffer_u32); 
-}
-function __UIBox(_x_, _y_, _w_, _h_) constructor {
-	_x = _x_;
-	_y = _y_;
-	_w = _w_;
-	_h = _h_;
-}
-function GetCommandBox(_buffer, _offset){
-	var _box = new __UIBox(
-	buffer_peek(_buffer, _offset+8, buffer_f32),
-	buffer_peek(_buffer, _offset+12, buffer_f32),
-	buffer_peek(_buffer, _offset+16, buffer_f32),
-	buffer_peek(_buffer, _offset+20, buffer_f32)
-	);
-	return _box;
-}
-function GetCommandColor(_buffer, _offset){
-	return make_color_rgb(
-	buffer_peek(_buffer, _offset+24, buffer_u8),
-	buffer_peek(_buffer, _offset+25, buffer_u8),
-	buffer_peek(_buffer, _offset+26, buffer_u8)
-	);
-}
-function GetCommandAlpha(_buffer, _offset){
-	var _alpha = buffer_peek(_buffer, _offset+27, buffer_u8)
-	return _alpha / 255;
-}
-function GetCommandCRad(_buffer, _offset){
-	return buffer_peek(_buffer, _offset+28, buffer_f32)
-}
-function GetCommandAsset(_buffer, _offset){
-	return buffer_peek(_buffer, _offset+32, buffer_f64)
-}
-function GetCommandDataBufferID(_buffer, _offset){
-	return buffer_peek(_buffer, _offset+40, buffer_f64)
-}
-
 function RednerClaySurface(){
 	static _buffer = buffer_create(WIN_WIDTH * WIN_HEIGHT * 4,buffer_fixed, 1);
 	static _surface = surface_create(WIN_WIDTH, WIN_HEIGHT, surface_rgba8unorm)
@@ -293,11 +260,15 @@ function IsBrectFull(_brect){
 	return ((_brect & 65535 ) > 0) && ((_brect>>16 & 65535 ) > 0) && ((_brect>>32 & 65535 ) > 0) &&((_brect>>48 & 65535 ) > 0);
 }
 function ClayEmptyDispatch(){
+	var _win_h =  WIN_HEIGHT;
+	var _win_w =WIN_WIDTH ;
+	var _length =gml_clay_update(_win_w, _win_h);
 	while(gml_clay_dispatch_command()){}
 }
 function RenderClayCommandsNDispatch(_x_offset = 0, _y_offset = 0, _surface = noone){
-	//static _scissor = gpu_get_scissor();
-	//timer++;
+	//static vform_settup = true;
+	//static vertex_format = 0;
+	//static vertex_buffer = 0;
 	var _win_h =  WIN_HEIGHT;
 	var _win_w =WIN_WIDTH ;
 	
@@ -314,9 +285,14 @@ function RenderClayCommandsNDispatch(_x_offset = 0, _y_offset = 0, _surface = no
 	var _color = c_white;
 	var _alpha = 1;
 	var _asset_id = noone;
+	draw_set_halign(fa_left);
+	draw_set_valign(fa_top);
 	if(_surface != noone && surface_exists(_surface)){
 		surface_set_target(_surface);
 		draw_clear_alpha(c_black, 0);
+		gpu_set_alphatestenable(true); 
+		gpu_set_blendmode(bm_add)
+		gpu_set_blendmode_ext_sepalpha(bm_src_alpha, bm_inv_src_alpha, bm_src_alpha, bm_one);
 	}
 	while(gml_clay_dispatch_command()){
 		_type = gml_clay_get_cmd_type();
@@ -364,22 +340,26 @@ function RenderClayCommandsNDispatch(_x_offset = 0, _y_offset = 0, _surface = no
 						draw_roundrect_ext(_x,  _y, _x2, _y2, _corner_rad, _corner_rad, true);
 						break;
 					}else {
-						//draw_rectangle( _x,  _y,  _x2,   _y2, true);
+						draw_rectangle( _x,  _y,  _x2,   _y2, true);
 					}
 						
 				}
 				if(_left > 0 ){
-					draw_rectangle(_x,  _y,  _x + (_left ),  _y2, false);
+					draw_line_width(_x, _y, _x, _y2,_left);
+					//draw_rectangle(_x,  _y,  _x + (_left ),  _y2, false);
 				}
 				if(_right > 0){
-					draw_rectangle(_x2,  _y2,  _x2 ,  _y- _right, false);
+					draw_line_width(_x2, _y2, _x2, _y,_right);
+					//draw_rectangle(_x2,  _y2,  _x2 ,  _y- _right, false);
 				}
 				if(_bottom > 0){
-					draw_rectangle(_x,  _y,  _x2,  _y + _bottom, false);
+					draw_line_width(_x, _y, _x2, _y,_bottom);
+					//draw_rectangle(_x,  _y,  _x2,  _y + _bottom, false);
 					
 				}
 				if(_top > 0){
-					draw_rectangle(_x2,  _y2,  _x - _top,  _y2, false);
+					draw_line_width(_x2, _y2, _x, _y2,_top);
+					//draw_rectangle(_x2,  _y2,  _x - _top,  _y2, false);
 				}
 				
 			}break;
@@ -391,17 +371,11 @@ function RenderClayCommandsNDispatch(_x_offset = 0, _y_offset = 0, _surface = no
 				var _fsize = gml_clay_get_font_size();
 				var _def_fsize = font_get_size(_lfont);
 				var _string = gml_clay_get_string();
-				draw_set_halign(fa_left);
-				draw_set_valign(fa_top);
+				
 				_fsize = (_fsize * 0.60) / _def_fsize;
 				draw_set_font(_lfont);
 				_fsize = _fsize * 100;
 				_fsize = round (_fsize) / 100
-				//scribble("This text is normal size. [scale,2]This text is twice as big. Long setence").draw(_x, _y);
-				//draw_text_scribble(_x, _y, $"[scale,{_fsize}][/font]{_string}")
-				//if(_string = global.tesstt){
-				//	show_debug_message("")	
-				//}
 				draw_text_transformed( _x,  _y, _string,  round (_fsize), round(_fsize),0);
 				draw_set_font(_def);
 				gml_clay_free_string();
@@ -413,12 +387,6 @@ function RenderClayCommandsNDispatch(_x_offset = 0, _y_offset = 0, _surface = no
 					_w / sprite_get_width(_asset_id),
 					_h / sprite_get_height(_asset_id),
 					0,_color, _alpha);
-				
-				//draw_sprite_stretched_ext(_asset_id, 0, _x,  _y,
-				//	_w ,
-				//	_h ,
-				//	_color, _alpha);
-				//}
 			}break;
 		    case CLAY_CMD_TYPE.START:{
 				gpu_set_scissor( _x,  _y,  _w,  _h);
@@ -438,77 +406,48 @@ function RenderClayCommandsNDispatch(_x_offset = 0, _y_offset = 0, _surface = no
 	//if(_s>0) show_debug_message($"size{_s}");
 	gml_clay_clear_arena();
 	if(_surface != noone&& surface_exists(_surface)){surface_reset_target();}
-	draw_set_color(c_white);
-	draw_set_alpha(1);
-}
-
-
-
-function RenderClayCommandsNDispatchText(){
-	//static _scissor = gpu_get_scissor();
-	//timer++;
-	var _win_h =  WIN_HEIGHT;
-	var _win_w = WIN_WIDTH;
-	
-	var _length =gml_clay_update(_win_w, _win_h);
-	var _scissor = gpu_get_scissor();
-	var _type = 0;
-	var _x = 0;
-	var _y = 0;
-	var _w = 0;		
-	var _h = 0;
-	var _x2 = 0;
-	var _y2 = 0;
-	var _col_t = 0;
-	var _color = c_white;
-	var _alpha = 1;
-	while(gml_clay_dispatch_command()){
-		_type = gml_clay_get_cmd_type();
-		_x = gml_clay_get_box_x();
-		_y = gml_clay_get_box_y();
-		_w = gml_clay_get_box_w();		
-		_h = gml_clay_get_box_h();
-		_x2 = _x+ _w;
-		_y2 = _y+ _h;
-		_col_t = gml_clay_get_color();
-		_color = make_color_rgb(
-		(_col_t) & 255,
-		(_col_t >> 8) & 255,
-		(_col_t >> 16) & 255
-		);
-		_alpha = ((_col_t >> 24) & 255) /255;
-		draw_set_color(_color);
-		draw_set_alpha(_alpha);
-		switch(_type){
-			case CLAY_CMD_TYPE.TEXT:{
-				//continue;
-				var _def = draw_get_font();
-				var _fid = gml_clay_get_font_id();
-				var _lfont = GetClayFont(_fid) ;
-				var _fsize = gml_clay_get_font_size();
-				var _def_fsize = font_get_size(_lfont);
-				var _string = gml_clay_get_string();
-				_fsize = (_fsize * 0.60) / _def_fsize;
-				draw_set_font(_lfont);
-				draw_text_transformed( _x,  _y, _string, _fsize, _fsize,0);
-				draw_set_font(_def);
-				gml_clay_free_string();
-			}break;
-			case CLAY_CMD_TYPE.START:{
-				gpu_set_scissor( _x,  _y,  _w,  _h);
-			}break;
-			case CLAY_CMD_TYPE.END:{
-				gpu_set_scissor(_scissor);
-			}break;
-			default:{
-				
-			}break;
-		}
-	}
-	
 	gpu_set_scissor(_scissor);
 	draw_set_color(c_white);
 	draw_set_alpha(1);
+	gpu_set_blendmode(bm_normal);
+	//gpu_set_alphatestenable(false); 
+	//gpu_set_colorwriteenable(true, true, true, true);
+	//gpu_set_ztestenable(false);
 }
+//function InitVertexFormat(){
+//		vertex_format_begin();
+//		vertex_format_add_position_3d();
+//		vertex_format_add_color();
+//		vertex_format_add_texcoord();
+//		return vertex_format_end();
+//}
+
+//function VertexSpriteInit(_sprite, _format, _x, _y, _w, _h){
+//	var _uv_data = sprite_get_uvs(_sprite, 0);
+//	var _umin = _uv_data[0], _vmin = _uv_data[1], _umax = _uv_data[2], _vmax = _uv_data[3];
+//	var _x2 = _x+_w;
+//	var _y2 = _y+_h;
+//	var vb = vertex_create_buffer();
+
+//	vertex_begin(vb, _format);
+
+//	vertex_position_3d(vb,   _x,   _y, -5000); vertex_color(vb, c_white, 1); vertex_texcoord(vb, _umin, _vmin);
+//	vertex_position_3d(vb, _x2,   _y, -5000); vertex_color(vb, c_white, 1); vertex_texcoord(vb, _umax, _vmin);
+//	vertex_position_3d(vb,   _x, _y2, -5000); vertex_color(vb, c_white, 1); vertex_texcoord(vb, _umin, _vmax);
+//	vertex_position_3d(vb, _x2, _y2, -5000); vertex_color(vb, c_white, 1); vertex_texcoord(vb, _umax, _vmax);
+
+//	vertex_end(vb);
+//	return vb;
+//}
+//function DrawVertexSprite(_sprite, _format,_x, _y, _w, _h, _color = c_white, _alpha = 1){
+//	static _map = ds_map_create();
+//	var _dbg_map = _map;
+//	var v_buf = VertexSpriteInit(_sprite,  _format,_x, _y, _w, _h);
+	
+//	var _tex = sprite_get_texture(_sprite, 0);
+//	vertex_submit(v_buf, pr_trianglestrip, _tex);
+//	vertex_delete_buffer(v_buf);
+//	//todo
+//}
 
 

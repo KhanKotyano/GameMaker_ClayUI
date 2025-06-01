@@ -11,7 +11,8 @@ function MapPopulateByFunction(_map, _func, _args){
 	var _size = ds_map_size(_map);
 	var _key = ds_map_find_first(_map)
 	for(var i =0;i<_size;i++){
-		_map[? _key] = method_call(_func, _args);
+		//_map[? _key] = method_call(_func, _args);
+		ds_map_replace_map(_map, _key, method_call(_func, _args));
 		_key = ds_map_find_next(_map, _key);
 	}
 }
@@ -59,4 +60,57 @@ function Gui_y_to_room_y(_y, _camera ) {
     var p = _y / display_get_gui_height();
     p *= camera_get_view_height(_camera);
     return p + camera_get_view_y(_camera);
+}
+function IsIndexInArray(_array, _index){
+	var _size = array_length(_array)
+	if(_index >= 0 && _index < _size)return true;
+	return false;
+}
+function Range(_a, _b){
+	return  abs( _a - _b);
+}
+function MakeCharList(_string, _list){
+	var _size = string_length(_string)
+	for(var i =0;i<_size;i++){
+		_list[| i] = string_char_at(_string, i+1);
+	}
+	return _list;
+}
+function MakeStringFromCharList(_list){
+	var _size = ds_list_size(_list);
+	var _string = "";
+	for(var i =0;i<_size;i++){
+		_string+= string(_list[| i]);
+	}
+	return _string;
+}
+function DsMapGetNextKey(ds_map, _key){
+	if(_key == ds_map_find_last(ds_map)){
+		_key = ds_map_find_first(ds_map);
+	}else {
+		_key = ds_map_find_next(ds_map,_key);
+	}
+	return _key
+}
+function GetKeysFromString(_string, _div_char = ";", _preserve_digits = false){
+	var _size = string_length(_string);
+	var _keys_array = [];
+	var _key = "";
+	var _c = ""
+	for(var i =1;i<=_size;i++){
+		_c = string_char_at(_string, i)
+		while(_c != _div_char && i <=_size){
+			_key += _c;
+			 i++;
+			 _c = string_char_at(_string, i);
+		}
+		if(!_preserve_digits){
+			if(_key != "" && string_length(_key) == string_length( string_digits(_key) )){
+				_key = real(_key);
+			}
+		}
+		if(_key !="") array_push(_keys_array, _key);
+		_key = "";
+	}
+	return _keys_array;
 }
