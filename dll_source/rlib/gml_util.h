@@ -76,7 +76,8 @@ Vector2 MeasureTextEx_ext(FontData font, const char *text, float fontSize, float
     float textWidth = 0.0f;
     float tempTextWidth = 0.0f;     
 
-    float textHeight = fontSize;
+    float textHeight = (fontSize/(float)font.baseSize);
+    textHeight = textHeight * 2;
     float scaleFactor = fontSize/(float)font.baseSize;
 
     int letter = 0;                 
