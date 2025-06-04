@@ -37,9 +37,6 @@ typedef struct {
     Clay_ErrorHandler clay_errorh;
     Clay_RenderCommandArray render_commands;
     int counter;
-    #if !NATIVE_RENDER
-    Image screen_buffer;
-    #endif
     bool is_accept_pressed;
   
     int fonts_number;
@@ -80,29 +77,19 @@ static Clay_Dimensions GmlMeasureText(Clay_StringSlice text, Clay_TextElementCon
     Vector2 v =  MeasureTextEx_ext(fontToUse, text.chars, config->fontSize, config->letterSpacing, text.length);
     textSize.width = v.x ;
     textSize.height = v.y;
-    //MemoryArenaClear(&internal_arena);
     return textSize;
   }
   
   
 DLLEXPORT double gml_clay_update(double width, double height) {
-    #if !(NATIVE_RENDER)
-    if(width !=  clay_data.screen_size.width && height!=clay_data.screen_size.height){
-      SetWindowSize(width, height);
-    }
-    #endif
     clay_data.screen_size.height = height;
     clay_data.screen_size.width = width;
-
-    ///clay_data.delta_time = GetFrameTime();
     Vector2 scrollDelta = {clay_data.mouse_wheel_pos.x,clay_data.mouse_wheel_pos.y};
     Clay_SetLayoutDimensions((Clay_Dimensions){.height = height, .width = width});
     Clay_SetPointerState(clay_data.mouse_pos, clay_data.is_accept_pressed);
     Clay_UpdateScrollContainers(true, (Clay_Vector2) { scrollDelta.x, scrollDelta.y }, clay_data.delta_time);
     Clay_SetMeasureTextFunction(GmlMeasureText, clay_data.fonts);
     clay_data.render_commands = ClayGetRenderCommands();
-    //MemoryArenaClear(&internal_arena);
-    //m_requests.request_completed = 0;  
     return (double)clay_data.render_commands.length;
 }
 DLLEXPORT double gml_clay_clear_arena(){
@@ -110,23 +97,13 @@ DLLEXPORT double gml_clay_clear_arena(){
   return 1;
 }
 DLLEXPORT double gml_clay_update_logic(double width, double height) {
-  #if !(NATIVE_RENDER)
-  if(width !=  clay_data.screen_size.width && height!=clay_data.screen_size.height){
-    SetWindowSize(width, height);
-  }
-  #endif
   clay_data.screen_size.height = height;
   clay_data.screen_size.width = width;
 
-  //clay_data.delta_time = GetFrameTime();
-  // IsKeyPressed
   Clay_SetLayoutDimensions((Clay_Dimensions){.height = height, .width = width});
   Clay_SetPointerState(clay_data.mouse_pos,  clay_data.is_accept_pressed);
   Clay_UpdateScrollContainers(true, clay_data.mouse_wheel_pos, clay_data.delta_time);
   Clay_SetMeasureTextFunction(GmlMeasureText, clay_data.fonts);
- // clay_data.render_commands = ClayGetRenderCommands();
-  //MemoryArenaClear(&internal_arena);
-  //m_requests.request_completed = 0;  
   return 1;
 }
 DLLEXPORT double gml_clay_debug_mode(double flag) {
@@ -142,20 +119,10 @@ DLLEXPORT double gml_clay_init(double screen_width, double screen_height) {
     clay_data.screen_size.width = (float)screen_width;
     clay_data.screen_size.height = (float)screen_height;
     Clay_Initialize(clay_data.memory, clay_data.screen_size, clay_data.clay_errorh);
-    #if !NATIVE_RENDER
-    SetTraceLogLevel(LOG_WARNING);
-    ScreenBufferInit(&clay_data.screen_buffer,(int)screen_width,(int)screen_height);
-    u32 flags =  FLAG_WINDOW_HIGHDPI | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_HIDDEN | FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_TRANSPARENT;
-    Clay_Raylib_Initialize(screen_width, screen_height, "render", flags);
-    surface_render = LoadRenderTexture(screen_width, screen_height);
-   
-    loop(i,8)render_flags[i] = 1;
-    #endif 
     return 1;
 }
 DLLEXPORT double gml_clay_add_font(char *name){
     if(clay_data.fonts_number < 100){
-      //clay_data.fonts[clay_data.fonts_number] = LoadFontFromMemory(".ttf", );
       clay_data.fonts[clay_data.fonts_number] = LoadFontEx(TextFormat("fonts/%s", name), 32, 0, 400);
       if(clay_data.fonts_number == 0){
         Clay_SetMeasureTextFunction(GmlMeasureText, clay_data.fonts);

@@ -22,6 +22,10 @@ typedef int_fast32_t fast_int;
 typedef uint_fast32_t fast_uint;
 typedef s8 bool_s8;
 
+static uint_fast64_t __loop_cntr64 = 0;
+#define repeat64(COUNT) for(__loop_cntr64 = 0; __loop_cntr64 < COUNT; __loop_cntr64++)
+#define loop64(name,COUNT) for(uint_fast64_t name = 0; name < COUNT; name++)
+
 #define loop(name, count) for(fast_int name = 0;name < count;name++)
 #define loopr(name, count) for(fast_int name = count;name >= count;name--)
 static fast_uint __REPEAT_COUNTER__ = 0;
@@ -84,7 +88,7 @@ typedef struct {
 static InternalMemoryArena MemoryArenaInit(size_t allocated_size){
   InternalMemoryArena arena = {0};
   arena.alloc_size = allocated_size;
-  arena.buffer = calloc(allocated_size, sizeof(char));
+  arena.buffer = (char *)calloc(allocated_size, sizeof(char));
   return arena;
 }
 static void* MemoryRequest(size_t byte_size, InternalMemoryArena *arena){
