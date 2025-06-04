@@ -1,5 +1,5 @@
 #ifndef UNI_UTIL_LIB
-
+#define UNI_UTIL_LIB
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -194,7 +194,7 @@ static bool_s8 InRange(s64 value, s64 min, s64 max) {
 }
 
 
-
+///-------------------TEMP------------------------//
 
 uintmax_t ConvertStringToNumber(char* s) {
   uintmax_t num = strtoumax(s, NULL, 10);
@@ -207,9 +207,4 @@ uintmax_t ConvertHexStringToNumber(char* s) {
   return num;
 }
 
-
-
-
-#pragma clang diagnostic pop
-#define UNI_UTIL_LIB
 #endif
