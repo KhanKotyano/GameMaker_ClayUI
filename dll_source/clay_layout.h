@@ -136,10 +136,18 @@ EXPORT_DEFAULT gml_clay_ui_element_set_image_id( double image_id){
 //floating elements
 EXPORT_DEFAULT gml_clay_ui_element_floating_attach_to_parent( double attach_point){
     current_elemet.floating.attachTo = CLAY_ATTACH_TO_PARENT;
-    current_elemet.floating.attachPoints.parent =(Clay_FloatingAttachPointType)attach_point ;
+    current_elemet.floating.attachPoints.parent = CLAY_ATTACH_POINT_LEFT_BOTTOM ;
    
     return 1;
 }
+EXPORT_DEFAULT gml_clay_ui_element_floating_attach_to_id( double attach_point, double _id){
+    current_elemet.floating.attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID;
+    current_elemet.floating.attachPoints.element =(Clay_FloatingAttachPointType)attach_point ;
+    current_elemet.floating.parentId = (u32)_id ;
+   
+    return 1;
+}
+
 EXPORT_DEFAULT gml_clay_ui_element_attach_to_point( double point_x, double point_y){
     current_elemet.floating.attachTo = CLAY_ATTACH_TO_ROOT;
     current_elemet.floating.offset.x = point_x ;
