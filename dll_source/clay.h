@@ -3,7 +3,7 @@
 /*
     NOTE: This is modified version of clay.h by Nic Barker
     List of modifications is as followed:
-
+    ...
 */
 
 #include <stdint.h>
