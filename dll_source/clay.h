@@ -1,13 +1,9 @@
 // VERSION: 0.12
 
 /*
-    NOTE: In order to use this library you must define
-    the following macro in exactly one file, _before_ including clay.h:
+    NOTE: This is modified version of clay.h by Nic Barker
+    List of modifications is as followed:
 
-    #define CLAY_IMPLEMENTATION
-    #include "clay.h"
-
-    See the examples folder for details.
 */
 
 #include <stdint.h>
@@ -1163,6 +1159,7 @@ Clay__MeasureTextCacheItem *Clay__MeasureTextCached(Clay_String *text, Clay_Text
             return &Clay__MeasureTextCacheItem_DEFAULT;
         }
         char current = text->chars[end];
+        //beginning of KotyanChange
         if (current == ' ' || current == '\n' || (current == 92 && text->chars[end+1] == 'n')) {
             int32_t length = end - start;
             Clay_Dimensions dimensions = Clay__MeasureText(CLAY__INIT(Clay_StringSlice) { .length = length, .chars = &text->chars[start], .baseChars = text->chars }, config, context->measureTextUserData);
@@ -1182,7 +1179,7 @@ Clay__MeasureTextCacheItem *Clay__MeasureTextCached(Clay_String *text, Clay_Text
                 measured->containsNewlines = true;
                 lineWidth = 0;
             }
-            //KotyanChange
+           
             if (current == 92 && text->chars[end+1] == 'n'){
                 if (length > 0) {
                     previousWord = Clay__AddMeasuredWord(CLAY__INIT(Clay__MeasuredWord) { .startOffset = start, .length = length, .width = dimensions.width, .next = -1 }, previousWord);
@@ -1194,6 +1191,7 @@ Clay__MeasureTextCacheItem *Clay__MeasureTextCached(Clay_String *text, Clay_Text
                 lineWidth = 0;
                 end++;
             }
+            //end of KotyanChange
             start = end + 1;
         }
         end++;
